@@ -1,0 +1,32 @@
+-----------------------------------------------------------------------------
+# EJERCICIO: ParacticaProductosSDT
+-----------------------------------------------------------------------------
+Data Provider + SDT + Procedure
+>> https://www.youtube.com/watch?v=7UcFIv0A5LY
+-----------------------------------------------------------------------------
+Al crear un SDT que sera emparejado con una transacción, es necesario
+que sus elementos tenga el mismo tipo de datos de la transacción
+-----------------------------------------------------------------------------
+DATA PROVIDER:
+con este se consultara la cabecera de los pedidos e irla cargando en el
+SDT los datos solicitados por el SDT
+1. Un Data Provider puede Ordenar y Filtrar Datos
+
+SDTPedidos
+{
+	SDTPedidosItem ORDER (PedidoFecha)
+	WHERE PedidoFecha >= &PedidoFecha WHEN NOT &PedidoFecha.IsEmpty()
+	WHERE PedidoId = &PedidoId WHEN NOT &PedidoId.IsEmpty()
+	{
+		NumeroPedido = PedidoId
+		Fecha = PedidoFecha
+		Cliente = ClienteNombre
+		CantidadProductos = PedidoContadorProductos
+		ValorTotal = TotalPedidos(PedidoId)
+		Detalle = 'Ver Detalle'
+	}
+}
+
+FILTROS:
+Para que un DATA PROVIDER filtre por un datos especifico, este debe estar
+contemplado en el SDT y debe recibir los parametros al filtrar.

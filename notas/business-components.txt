@@ -1,0 +1,102 @@
+/*BUSINESS COMPONENT*/
+Permite Insertar, Actualizar, Eliminar los datos de una transacción por 
+código.
+Para activar el BC (Business Component) en las propiedades de la transacción
+act
+Business Component -> cambiar a True
+-------------------------------------------------------------------------------
+# TRANSACCIONES PARALELAS #
+Es cuando se compia una transacción con diferente nombre, pero comparten
+la misma tabla
+
+# BC Como usar #
+Solo se podra implementar en procedimientos, al crea una variable en el 
+procedimiento con el mismo nombre de la transacción pero en minusculas,
+esta variable se comportara como una colección, y, permitira el acceso
+a los atributos de la transacción.
+
+  &transactioName.AttrTransaction = Value
+
+Una vez pasados los datos, se podra guardar con insert y Commit 
+
+  if &transactionName.Insert()
+    Commit
+  else
+    Rollback
+  endif
+
+Insert() -> retorna un true si la operación se completo con exito
+Commit -> Da de alta la operación
+
+Para ejecutar el procedimiento desde developer menu, En las Propiedades:
+Main Program -> True
+Call Protocol -> HTTP
+
+EDITAR:
+Para editar un registro desde el Business Component, se debe cargar la
+variable con los valores a modificar, y pasar el identificador del registro
+o la llave 
+  
+  &transactionName.Load(id)
+  &transactionName.NombreAtributo = Nuevo Valor
+
+  if &transactioName.Update()
+    commit
+  endif
+
+ELIMINAR UN REGISTRO:
+
+  &attraction.Load(id)
+  &attraction.Delete()
+  If &attraction.Success()
+    Commit
+  Endif
+
+ERRORES: en genexus cuando se implementa el Business Component, tambien se
+deben controlar los errores por medio del código para esto genexus
+provee un objeto Message el cual se encuentra en 
+References > Genexus > Common > Messages
+
+Por ende en el SOURCE del procedimiento en el cual se esta implementando
+el Bussines Component
+se debe invocar este objeto para obtener los mensajes, este objeto debe
+ser almacenado en una variable local
+
+  &messages = &attraction.GetMessages()
+
+  // OBTENER ERRORES
+  &attraction = new()
+  //&attraction.AttractionName = "Notre Dame Cathedral"
+  &attraction.CountryId = find(CountryId, CountryName = "France")
+  &attraction.CityId = find(CityId, CityName = "Paris")
+  &attraction.CategoryId = find(CategoryId, CategoryName = "Monument")
+  // Insertar
+  If &attraction.Insert()
+    //Commit Solo si la primera inserción fu exitosa
+    commit
+  else
+    &messages = &attraction.GetMessages()
+    for &mesage in &messages
+      print MessagePb
+    endfor
+  endif
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+# POBALCION DE DATOS CON BUSINESS COMPONENT Y DATA PROVIDERS
+-------------------------------------------------------------------------------
+Un SDT permite devolver datos estructurados tanto simples como colecciones
+un business componen es igual que un SDT en lo que compone su estructura, Por 
+lo que los DATA PROVIDERS también permitiran cargar y devolver BUSINESS COMPONENTS
+tanto simples como Colecciones.
+
+-------------------------------------------------------------------------------
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------

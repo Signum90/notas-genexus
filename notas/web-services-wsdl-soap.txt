@@ -1,0 +1,90 @@
+-----------------------------------------------------------------------------
+#PRACTICA: WebServiceWSDL
+#KB: WebServiceWSDL
+-----------------------------------------------------------------------------
+Implementación de web service por medio del tipo 
+WSDL (Web Services Description Language)
+-----------------------------------------------------------------------------
+PROCESO:
+1 - Se crea una transaccion llamada Cliente:
+  > Id, identificacion, razon social, correo, estado (1-Activo, 2-Inactivo)
+-----------------------------------------------------------------------------
+2 - Se crea un procedimiento, al cual se le cargan sus metodos
+  de consumo por el cliente: 
+  // ACTUALIZAR CLIENTE
+  Stub ActualizarCliente()
+
+  Endstub
+
+  // LISTAR CLIENTE
+  Stub ListarClientes()
+
+  Endstub
+-----------------------------------------------------------------------------
+3 - Se crea un SDT para la transacción de clientes
+  > Este SDT no sera una colección pero tendra la estructura de la
+  transacción Cliente: SDTCliente
+-----------------------------------------------------------------------------
+4 - LISTAR CLIENTES:
+  En el metodo de listar se define un parametro de salida tipo out:
+  este parametro retornara una variable tipo SDT para alamacenar todos 
+  los clientes SDTClientes
+  > Cada cliente se debe almacenar en un un SDT de tipo SDTCliente y este SDT
+  a su vez en una SDTClientes tipo colección:
+    // LISTAR CLIENTE
+    Stub ListarClientes(out: &SDTClientes)
+      // Recorrer Transacción
+      for each Cliente
+        
+        // Almacenar cada registro en el SDTCliente
+        &SDTCliente = new()
+        &SDTCliente.ClienteId = ClienteId
+        &SDTCliente.ClienteIdentificacion = ClienteIdentificacion
+        &SDTCliente.ClienteRazonSocial = ClienteRazonSocial
+        &SDTCliente.ClienteEmail = ClienteEmail
+        &SDTCliente.ClienteEstado = ClienteEstado
+
+        // Almacenar el Registro SDTCliente, en la colección de clientes
+        &SDTClientes.Add(&SDTCliente)
+
+      endfor
+    Endstub
+
+5 - El procedmiento donde se desarrolla el web service debe ser configurado de 
+la siguiente manera, en las Properties:
+
+  >>> Main Program: True
+  >>> Call Protocol: SOAP
+  
+6 - Para probar el Web Service se deje ejecutar un RUN sobre el archivo del
+procedimiento, este generara la URL a la cual se le debe agregar al final
+el query: ?wsdl 
+  
+  URL Natural:
+  http://localhost:8080/WebServiceWSDLJavaSQLServer/com.webservicewsdl.aconsumoclientes
+
+  URL Agregando Query:
+  >> http://localhost:8080/WebServiceWSDLJavaSQLServer/com.webservicewsdl.aconsumoclientes?wsdl
+-----------------------------------------------------------------------------
+7 - ACTUALIZAR CLIENTES:
+  > Para actualizar clientes, se implementara un metodo el cual recibira 2 parametros (identificación y 
+  correo )
+  > se recorrera con un for each la colección Cliente, se validara que la identificación enviada corresponda
+  a un cliente en la base de datos, por medio de esta conicidencia se actualizara el correo del cliente
+    
+    // ACTUALIZAR CLIENTE ================================================
+    Stub ActualizarCliente(in: &ClienteIdentificacion, in: &ClienteEmail, out: &Response)
+      // Recorrer clientes	
+      for each Cliente
+        // Buscar por Identificación
+        where ClienteIdentificacion = &ClienteIdentificacion
+        // Validar que este Activo
+        where ClienteEstado = Estado.Activo
+        // Actualizar campo		
+        ClienteEmail = &ClienteEmail
+        // Mensaje respuesta		
+        &Response = "El cliente " + ClienteRazonSocial + " fue actualizado correctamente"
+      when none
+        &Response = "El cliente no existe en la base de datos"
+      endfor
+    Endstub

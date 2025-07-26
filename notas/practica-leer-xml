@@ -1,0 +1,24 @@
+------------------------------------------------------------------------------
+# PRACTICA: LeerXML
+# KB: PracticaXML
+-----------------------------------------------------------------------------
+Ejercicio:
+  1. Consumir un XML desde un directorio de Windows
+  2. Leer su contenido
+  3. Cargar su contenido por medio de un SDT Genexus
+  # https://www.youtube.com/watch?v=HzdqJvdf0Y4
+-----------------------------------------------------------------------------
+1 -> Localizar el path de la carpeta donde esta el archivo XML
+  &Carpeta = 'C:\Users\ADMIN\Documents\2.Curso-Genexus'
+2 -> Crear una variable tipo Directory, para tomar el source del path
+a la carpeta y leer su contenido
+  &Directory.Source = &Carpeta
+3 -> Recorrer los archivos identificados dentro de la carpeta con un
+for i
+
+
+
+//#  >
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------

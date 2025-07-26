@@ -1,0 +1,64 @@
+/*NOTA:
+Los eventos imperan sobre las propiedades definidas en el panel,
+es decir si una propiedad es modificada desde un evento, primara
+la modificacion definida en el evento
+*/
+// Eevento Estandar: Al ingresar al web panel
+Event Start
+	// TOMAR FECHAS TOMCAT
+	// sysdate() -> Fecha actual
+	// Now() -> Fecha y hora actual
+	// TOMAR FECHAS DEL SERVIDOR
+	// ServerDate -> Fecha Actual
+	// ServerNow() -> Fecha y Hora Actual
+	&FacturaFecha = Now()
+Endevent
+
+// Se ejecuta al llamar el evento 'Volver'
+Event Refresh
+	
+Endevent
+
+// Evento Personalizado
+Event 'Volver'
+	Refresh
+Endevent
+
+// Este evento se usa en transacciones de carga de información de los GRIDS
+Event Load
+	
+Endevent
+
+// Se ejecuta al darle click a el elemento boton que tenga el evento Enter
+Event Enter
+	
+Endevent
+
+
+Event 'Seleccionar'
+	
+Endevent
+
+// Este evento se ejecuta cuando se tabula a la propiedad de la transacción citada como una variable
+Event &FacturaNumero.IsValid()
+	
+Endevent
+
+// Cargar Información en el GRID
+Event Grid1.Load()
+	//	Realizar un recorrido de datos
+	/*Un elemento del GRID puede estar oculto, pero aún asi es accesible desde los eventos */
+	/*CONSULTA: Ordednar por el kardex Id*/
+	for each order KardexId
+		// Cuando el número de factura sea igual al la indicada en la variable &FacturaNumero
+		where FacturaNumero = &FacturaNumero
+		//	Pasar los datos de la consulta a las variables definidas en la grilla
+		&KardexId = KardexId
+		&ArticuloId = ArticuloId
+		&ArticuloNombre = ArticuloNombre
+		&ArticuloPrecio = ArticuloNombre
+		&KarUni = KarUni
+		// Cargar y Imprimir en pantalla
+		load
+	endfor 
+Endevent

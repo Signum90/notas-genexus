@@ -1,0 +1,458 @@
+# REGLAS
+-------------------------------------------------------------------------------
+En una transacción se pueden implementar reglas de validación, estas se
+encuentran en las sub pestañas de la transacción conocida como RULES,
+Las reglas se validan en el CLIENTE y en el SERVIDOR, se podrán desactivar
+en el CLIENTE pero no en el SERVIDOR.
+
+Regla Error() ->  Genera un mensaje y evita la inserción
+	Error("Mensaje") if validación;
+
+Regla Msg() -> Esta regla envia un mensaje advertencia, pero permite la inserción
+	Msg("Mensaje") Condición
+
+Regla Default -> Permite inicializar un atributo o variable con un valor especifico
+	Default(Attr| Variable, Valor);
+
+Regla NoAccept -> 
+Evita que el valor de un campo sea cambiado por la interacción del usuario final. 
+En la mayoría de los entornos, esto significa que el campo está deshabilitado
+	NoAccept(Attr);
+
+Regla Acondicionamiento de asignación
+	&Variable = Dato if insert;
+	&Variable = Dato if update;
+	&Variable = Dato if delete;
+
+Regla Serial() -> Autonumera un attributo, esencial para tablas en segundos nieles
+	Serial(Attr1, Attr2, Step)
+	Attr2 -> se encargara de guardar el último valor asignado, debe estar
+	en el nivel superior	
+	Step -> Paso incremental, incremento
+-------------------------------------------------------------------------------
+
+
+# PATRONES: WORK WITH FOR WEB
+-------------------------------------------------------------------------------
+Permiten potencializar la aplicación, crea objetos necesarios en la vista
+como un estado CRUD, desde la vista.
+Esto permite a partir de una Instacia o Transacción construir una serie de pantallas
+que se invocan entre si siguiendo una lógica de forma gerarquica, permite trabajar
+con cada elemento ya sea para mostrarlo o editarlo.
+
+Work With -> se puede usar en aplicaciones web o dispostivos moviles
+Activar Work With -> se activa en las sub pestañas de la transacción, PATTERNS
+	Work With for Web -> Check en Apply this pattern on save
+
+Funcionalidades:
+1. OCULTAR: Se pueden ocultar datos en la tabla o grid de datos
+	Dentro del Work With Pattern Instace
+	Selections > 
+		Models > Define las operaciones que se pueden realizar
+							insert, update, delete
+		* Attributes > Define los atributos que seran mostrados en el Grid,
+								Atributo eliminado no se mostrara en el grid
+2. FILTROS: Se pueden aplicar filtros de busqueda en el Grid
+	Selectrion >
+	* Filter > Attributes -> Clic derecho: Select Attributes
+		Seleccionar el atributo sobre el cual se va ha realizar el filtro
+
+3. ORDENAMIENTO: Se pueden definir reglas de ordenamiento de datos en el GRID
+	
+	Selection > Orders -> Click derecho: Add > Order
+	En el nuevo Order(), Agregado, en properties, se debe agregar un nombre al Order(Name)
+	
+	Order > Click derecho: Add > Attribute -> Agregar el atributo por el cual se 
+	va a ordernar
+4. PAGINACIÓN: Se puede agregar una configuración de paginación
+	Selection -> en Properties:
+	Rows per page: Custom
+	Custom Rows: Numero de filas a mostrar por página
+
+5. EDITAR LA TRANSACCIÓN: Si se agrega o elimina un attributo de la Transacción,
+el work with web se sincronizara con la transacción y realizara el cambio,
+PERO, si se edita el Web Layout y se elimina del FORM este perdera la conexión
+	RECUPERAR LA CONEXIÓN: para recuperar el dinamismo con el FORM y la Transacción
+	en el Menu Edit > Click: Apply Default Work With Instance
+
+6. RESTRINGIR OPERACIONES: se puede restringir operaciones sobre los datos, para esto
+	Selection(TransactionName) > Models: En properties aparecera
+	
+	Insert, Update, Delete, Display, Export
+	
+	Cambiar a False la que se quiera restringir
+
+-------------------------------------------------------------------------------
+
+
+# VARIABLES
+-------------------------------------------------------------------------------
+Para definir una variable se usa el carácter especial " & "
+Las variables son tipadas, por ende debe agregarse un tipo de dato
+Son locales y solo pueden ser utilizadas dentro del objeto
+ 
+$NombreVariable
+-------------------------------------------------------------------------------
+
+# ACONDICIONAMIENTO DE ASIGNACIONES
+-------------------------------------------------------------------------------
+Se puede acondicionar el asignamiento de valores a una variable
+
+	&Variable = Dato if insert;
+	&Variable = Dato if update;
+	&Variable = Dato if delete;
+-------------------------------------------------------------------------------
+
+
+
+# VARIABLES PREDEFINIDAS
+-------------------------------------------------------------------------------
+En genexus existen variables predefinidas, o variables del sistema
+
+&Today -> permite obtener la fecha actual del sistema
+
+
+# INCREMENTALES EN SEGUNDOS NIVELES DE TABLAS ASOCIADAS
+-------------------------------------------------------------------------------
+En una tabla asociada como segundo nivel, el id no será enumerado automáticamente
+-------------------------------------------------------------------------------
+
+# DEFINICIÓN DE SUBTIPOS:
+-------------------------------------------------------------------------------
+Un sub tipo se define para indicar la estructura de un atributo basado
+en un atributo de mayor nivel, estos se realiza para asociar distintos
+nombres a un mismo concepto, esto se puede aplicar de la siguiente forma:
+
+> Se tiene una transacción llamada Vueloa y una llama Aeropuertos
+
+> en Vuelos, es necesario indicar el aeropuerto de Salida y de llegada
+	con su Id, y, su nombre, estos estaran asociados a la tabla Aeropuertos
+
+> para Lograr esto, se crearn los campos en vuelos 
+	con su respectivo nombre y se asocian por medio de un subTipo a el Id 
+	del aeropuerto y el nombre
+
+	CAMPOS VUELOS / Sub Tipo				   Super Tipo
+	-------------------------------|-----------------
+	VueloDeSalidaAeropuertoId      |  AeropuertoId
+	VueloDeSalidaAeropuertoNombre  |  AeropuertoId
+
+	VueloDeLlegadaAeropuertoId     |  AeropuertoId
+	VueloDeLlegadaAeropuertoNombre |  AeropuertoId
+
+PAra lograr esto se debe crear un Grupo de Sub tipos / Subtype Group
+>> El grupo debe tener el nombre indicativo:
+ 	 	
+		VueloDeSalidaAeropuerto
+	
+	Sus Propiedades deben llamarse igual a como se van a llamar
+	en la transacción donde se va a realizar el relacionamiento
+	
+		VueloDeSalidaAeropuertoId
+		VueloDeSalidaAeropuertoNombre
+	Se debe indicar el Super Type del cual va a ser SubType
+-------------------------------------------------------------------------------
+
+# FORMULAS
+-------------------------------------------------------------------------------
+Muchas veces se necesita que la aplicación efectue un calculo de determinados
+Atributos, Constantes y/o funciones:
+
+> Tipos de Formulas:
+	>> Globales
+	>> Local - Or Line
+Las Formulas pueden evaluar condiciones y el resultado puede calcularse de diferentes
+formas dependiendo de si dichas condiones son verdaderas o falsas
+
+> FORMULAS GLOBALES: Es un calculo definido a un atributo,
+	> En las columnas de los Atributos, existe la columna Formula, si se define
+	un calculo en esta columna, se convertira en un atributo Virtual, es decir
+	no se creara fisicamente como campo en la tabla asociada, ya que el Valor
+	se obtendra como el resutaldo del calculo
+
+> Formulas Agrgate GLOBALES
+	> Sum(Attr) -> Suma atributos
+		Sum(Attr, Condicion de Flitro, Default Value) if condition;
+	> Average(Attr) -> Saca el promedio
+	> Max(Attr) -> Encuentra el valor maximo de un atributo en una tabla al ser recorrida
+		Max(Attr, Condicion de Flitro, Default Value, Return Attr Value) if condition;
+	> Min(Attr) -> Encuentra el valor minimo de un atributo en una tabla al ser recorrida
+		Min(Attr, Condicion de Flitro, Default Value) if condition;
+	> Find(Attr) -> encuentra el valor de un atributo según una condición
+		Find(Attr, Condicion de Flitro, Default Value) if condition;
+	> Count(Attr) -> Cuenta un atributo en una tabla, se puede agregar una condición, Count(Attr, Condition)
+		Count(Attr, Condicion de Flitro, Default Value) if condition;
+
+> FORMULAS LOCALES (or inline):
+	> Se implementan para ejecutarse en el lugar del código del bojeto en el que
+	se encuentran, por ejemplo en el Source de un Procedimiento
+-------------------------------------------------------------------------------
+
+
+# EVENTOS DE DISPARO DE REGLAS EN TRANSACCIONES
+-------------------------------------------------------------------------------
+Normalmente Genexus determina el momento de disparo de una REGLA, pero se puede
+modificar dicho momento.
+
+on AfterLevel level LevelAttr -> Instruacción para que una regla se dispare
+despues de un nivel de ubicación de un atributo en especifico
+
+on AfterComplete
+on AfterInsert -> Despues de inserción
+on BeforeInsert -> Antes de inserción
+on AfterUpdate -> Despues de Actualización
+on BeforeUpdate -> Antes de Actualización
+on AfterDelete -> Despues de Eliminar
+on BeforDelete -> Antes de Eliminar
+-------------------------------------------------------------------------------
+
+# INDICES / INDEX
+-------------------------------------------------------------------------------
+Permite acceder rapidamente a los registros de una tabla, mejorando la
+velocidad de las operaciones, si recorrer toda la tabla.
+
+Con el indice se puede traer el dato en especifico si se tiene el indice 
+de este dato.
+
+> Indices de Usuario: Son definidos por el desarrollador para realizar busquedas
+de manera eficiente.
+
+En la Transacción > Asociate Tables > Abrir Tabla: sub pestaña Indexes
+Enter en el arbol de Indices
+
+UNombreTransaccion1, 2, 3, etc
+
+Duplicate -> Permite valores duplicados
+Unique -> Valores unicos
+
+Enter: Definir el atributo por el que se va a regir este indice de usuario:
+ej: AttractionName
+-------------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------------
+# Listados Y Comandos por For Each para consultar base de datos
+
+Objeto Procedure -> Procedimientos
+Permite escribir código para cumplir procedimientos o funciones
+> Sintaxis
+
+	// IMPRIMIR PRINTBLOCK: Titulo
+	Print Title
+	// IMPRIMIR PRINTBLOCK: Titulos de la tabla
+	Print ColumnTitles
+	// FOR EACH: Permite acceder a una transacción en la base de datos
+	For each Attraction order CountryName
+		//	FILTRAR
+		//	where CountryId = 2
+		where CountryName = "France"
+		//	IMPRIMIR PRINTBLOCK: Attractions
+		Print Attracions
+	Endfor
+
+	ANIDADOS:
+	// PRINTBLOCK TITLE
+	Print Title
+	/*Ya que se Requiere recorrer la tabla de Categorias y esta no es
+	una tabla extendida de Atracciones, se deben implementar For Each
+	anidados*/
+	// RECORRER CATEGORIAS
+	For each Category
+		// PRINTBLOCK CATEGIRIES	
+		Print Cateogries
+		// PRINTBLOCK COLUMN TITLES
+		Print ColumnTitles
+		// RECORRER ATRACCIONES
+		For each Attraction
+			Print Attracions
+		Endfor
+	Endfor
+
+Para imprimir un PDF, se debe configurar el objeto Procedura
+en sus Propiedades
+	Main Program = True
+	Call Protocol = HTTP
+
+En la Subpestaña Rules:
+	Output_file("NombreArchivo.pdf", "pdf");
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+# COMUNICACIÓN ENTRE OBJETOS
+Al definir una Variable en un ObjetoA, el cual lo invoca en este caso un
+Procedmiento en el ObjetoB, para poder acceder a esta variable definida
+en el ObjetoA desde el ObjetoB
+> Se debe ir a la sección Rules y definir una Regla Parm, esta regla
+declara los parametro que puede recibir y/o devolver a quien la llama
+	>> Recibir parametros:
+		Parm(in: &NombreParametro, Attr); -> Click derecho y add variable
+	>> Devolver Parametros:
+		Parm(out: &NombreParametro)
+	>> Recibir y Devolver:
+		Parm(inout: &NombreVariable)
+	Explicación de Definiciones
+	IN -> El parametro llega con un valor y no puede cambiarse
+	OUT -> El parametro llega sin ningun valor y se retorna con un valor
+	INOUT -> El parametro llega con un valor y se puede cambiar, retornar
+
+> ENVIO DE ATRIBUTOS:
+	Se implementan cuando dentro del objeto se va acceder a la base de dato,
+	en particular a una tabla en cuya extendida se encuentra ese atributo,
+	asi al recibir por parametro un valor en ese atributo se aplicara un filtro
+	por igualdad, solo se Consideraran los registros que tengan ese valor para el 
+	atributo
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+# TIPOS DE DATOS ESTRUCTURADOS
+Solo pueden ser asignados a variables.
+
+> COMPUESTOS: 
+	Permite almacenar varios datos juntos en una sola variable
+
+En Genexus se puede arrastrar una Transacción a un SDT o tipo de dato estructurado
+este SDT adoptara y construira sus propiedades en vas a los atributos de esta 
+Transacción, y, si esta Transacción tiene mas niveles, estos seran marcados
+como Colecciones
+
+> VARIABLES COLECCIÓN:
+	Las variables pueden ser marcadas como colecciones, estas variables ofrecen
+	metodos propios para el manejo de sus datos
+
+	> Count: Retorna la cantidad de elementos de la coleccion
+		
+		&VariableColeccion.Count()
+
+	> Add: Permite agregar un elemento a la colección
+
+		&VariableColeccion.add(&Variable)
+	
+	> Remove: Permite eliminar un elemento de la colección, a partir de su indice,
+						el indicie comienza e 1 y terman en el valor retornado por .count()
+
+		&VariableColeccion.remove(indice)
+	
+	> Clear: Elimina todos los elementos de una colección
+
+		&VariableColeccion.clear()
+
+	> Sort: Permite organizar los elementos de una colección, si los elementos
+					son de tipo SDT, se puede indicar que ordene la colección de acuerdo
+					a alguna de las propiedades
+
+		&VariableColeccion.sort("Name")
+
+	> Recorrer: Una colección se puede recorrer con el bucle for in
+
+		For &CountryItem in &Countries
+			Print Countries
+		Endfor
+
+## SDT Collection:
+	Cuando un SDT es marcado como una colección, automaticamente creara un elemento
+	interno al cual le agrega la palabra item:
+		
+		SDTCountrys   -> 
+			SDTCountrysItem
+
+## Data Providers: Es un objeto que permite cargar una estructura de datos a partir
+								de información obtenida de la base de datos y devuelve la estructura
+								ya cargada
+
+	Si se carga un SDT al Source del Data Provider, se podra recorrer y llenar indicando
+	la Transacción de la cual se extraeran los datos
+
+		SDTCountrys from Transaction
+		{
+			SDTCountrysItem
+			{
+				Id = /*Id value*/
+				Name = /*Name value*/
+				AttractionsQuantity = /*Attractions Quantity value*/
+			}
+		}
+
+
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+WEB PANEL
+-------------------------------------------------------------------------------
+Permite crear interfaces WEB, se pueden implementar elementos como
+variables, botones, grids, tablas, entre otros
+
+## GRID:
+	Los grids permiten cargar información relacionada a una tabla / Transacción
+	SDT / Colecciones, entre otros
+	Cuando un grid tiene asociada una transacción y esta cargado en el web panel
+	este recorrera la transacción como un For each y mostrara la información
+	PROPIEDADES FUNDAMENTALES:
+	> Base Trm: Se indica la trnasacción de la cual se esta sacando información
+	> Conditions: Permite indicar filtrado de datos/registros sobre el GRID
+	> Order: Permite orgranizar los datos/registros sobre el GRID
+
+## EVENTOS: Todos los web panel contiene eventos Preestablecidos, pero su pueden
+crear eventos propios los cuales pueden ser llamados por los elementos impresos
+en el WEB PANEL
+	> START: Se ejecuta cuando se imprime la pantalla, se ejecuta una sola vez
+
+	> LOAD: este evento se ejecuta cuando se carga Información en el WEB PANEL
+			de un GRID Estos eventos pueden manipular la información cargada en un grid
+			> Cada GRID se le puede agragar su evento Load
+
+	> REFRESH: este evento se ejecuta cuando el WEB PANEL cambia
+			> Cada GRID se le puede agragar su evento Refresh
+
+	> EVENTO CLICK:
+		Event &VARIABLE.Click
+			Attraction(trnMode.Update, AttractionId)
+		Endevent
+# EVENTOS QUE SE DISPARAN CUANDO SE ABRE UN WEB PANEL
+	
+	START -> Se dispara una unica vez, bueno para incializar variables
+
+	Refresh -> Se dispara antes de cargarse la información de la pantall, tras este
+	evento se producira el acceso a la base de datos, para traer los datos de la tabla
+	base y su tabla extendida
+
+	Load -> Se ejecuta por cada registro que este en la tabla base, y valla a ser
+	cargado en el GRID, en este evento se debe programar todas las acciones que se
+	requieran a ejecutar antes de que la linea sea efectivamente cargada en el GRID 
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+# INVOCACIÓN DE VISTAS CRUD: MODOS DE VISTAS
+-------------------------------------------------------------------------------
+Cuando se crea una transacción esta anclada por defecto a una pattern Work With
+esta vista por defecto permite ejecutar acciones sobre los datos, acciones como:
+INSERTAR, ACTUALIZAR, ELIMINAR
+
+Para esto el pattern inserta controles con acciones asociadas que consisten
+en llamar a la transaccion enviandole como parametro el modo en el que se
+VISUALIZARA la transacción: INSERTAR, ACTUALIZAR, ELIMINAR
+
+En los procesos: ACTUALIZAR(UPD), ELIMINAR(DLT), VISUALIZAR(DSP) se enviara como segundo parametro el ID
+En los procesos: INSERT: se enviara 0 como segundo parametro
+Exitos.2023*
+Por esto el Patter WW, modifica la Transacción agregandole en sus RULES 2 variables
+	
+	Parm(in:&Mode, in:TransactionAttrId);
+
+	&Mode -> Es una variable estandar en trasacciones de tipo Character(3), la cual
+					 acepta 1 de 4 valores especificado en el DOMINIO Númerado TrnNode
+					 Insert -  INS
+					 Update -  UPD
+					 Delete -  DLT
+					 Display - DSP
+					Recibiendo uno de estos 4 valores, la transacción sabra en que modo
+					se abrira
+INVOCAR VISTAS:
+	TransactionName(trnMode.Update, AttractionId)	
+	TransactionName(trnMode.Delete, AttractionId)	
+	TransactionName(trnMode.Display, AttractionId)	
+	TransactionName(trnMode.Insert, 0)	
+-------------------------------------------------------------------------------
+
+
