@@ -1,5 +1,84 @@
 -----------------------------------------------------------------------
-# 
+# PRACTICA: ApiRest
+-----------------------------------------------------------------------
+> Video Practica:
+  # https://www.youtube.com/watch?v=W59dSV8Ng6Q
+
+> Diferencias entre REST y SOAP
+  # https://chakray.com/es/que-diferencias-hay-entre-rest-y-soap/#:~:text=A%20aquellos%20servicios%20web%20que,y%20ampliamente%20reconocida%20por%20todos
+
+> APIS de consumo Gratuito
+  # https://facialix.com/mas-de-35-api-publicas-gratuitas-que-te-seran-de-ayuda-en-tus-proyectos/
+
+> API Open NASA
+  # https://api.nasa.gov/
+
+> HttpClient Genexus
+  # https://wiki.genexus.com/commwiki/wiki?6932,HttpClient+data+type
+  # https://wiki.genexus.com/commwiki/wiki?44405,Consuming+a+Rest+Service+with+GeneXus
+  # https://wiki.genexus.com/commwiki/wiki?15314,HowTo%3A+Consume+a+Procedure+exposed+as+a+Rest+service
+  # https://wiki.genexus.com/commwiki/wiki?30737,HowTo%3A+Consume+a+Rest+Data+Provider
+-----------------------------------------------------------------------
+PASOS:
+1 - Construcción de un Web Panel: Views
+2 - Construcción de un Procedimiento: RestService
+-----------------------------------------------------------------------
+HttpClient: 
+  En genexus para consumir servicios rest basados en el protocolo
+  HTTP, se debe crear una variable basada en HttpClient
+-----------------------------------------------------------------------
+EN EL PROCEDIMIENTO RestService
+-----------------------------------------------------------------------
+3 - Crear una variable basada en HttpClient
+  &HttpClient
+4 - Estructurar la petición con los parametros del HttpClient
+
+    // HOST: Url base en la que se va a realizar la consulta
+    &HttpClient.Host = "api.nasa.gov"
+
+    // HTTPS: Inidicar que es un metodo seguro con HTTPS en 1, si no, en 0
+    &HttpClient.Secure = 1
+
+    // BASE URL: Implementación del path url
+    &HttpClient.BaseUrl = "/planetary"
+
+    // HEADERS: Añadir cabeceras, en este caso de respuesta tipo json
+    &HttpClient.AddHeader('Content-type','application/json')
+
+    // EJECUTAR REQUEST: Se debe incluir el metodo, y la ruta final, con N parametros
+    &HttpClient.Execute("GET", "/apod?api_key=sZd1VllCASg1ZTxeRI4HzJkpbKjVoGTa5Ra9ul9U")
+
+    // VALIDACIÓN: calidar el código de estado
+    if &HttpClient.StatusCode = 200
+      // Capturar el resultado, pasar a texto
+      &Response = &HttpClient.ToString()
+      // PAsar al SDT transformando a JSON	
+      &SDTNasaResponse.FromJson(&Response)
+    endif
+
+5 - Crear un SDT con las propiedades a recibir
+
+6 - Cargar el SDT con la resuesta del request, parseando a JSON
+    
+    // PAsar al SDT transformando a JSON	
+    &SDTNasaResponse.FromJson(&Response)
+
+7 - En las Reglas del Procedimiento definir el retorno de este SDT
+    
+    Parm(out: &SDTNasaResponse);
+
+-----------------------------------------------------------------------
+EN EL WEB PANEL: Views
+-----------------------------------------------------------------------
+8 - En los eventos, Agregar el llamado del Procedimiento, pasando una Variable tipo SDT
+  del mismo tipo del SDT creado en el procedimiento, para recibir la respuesta
+  en el web panel
+  
+  # EVENTO CLICK
+  Event 'GetData'
+    RestService.Call(&SDTNasaResponse)
+  Endevent
+
 -----------------------------------------------------------------------
 -----------------------------------------------------------------------
 
