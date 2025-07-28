@@ -1,0 +1,148 @@
+-----------------------------------------------------------------------------
+#PRACTICA: WebServiceWSDL
+#KB: WebServiceGenexus
+#VIDEO: https://www.youtube.com/watch?v=8Sp2Zpv7qLE&t=205s
+-----------------------------------------------------------------------------
+En genexus se pueden implementar 2 protocolos para el consumo de 
+Web Services, estos son: SOAP y REST, para poder realizar su Implementación
+dentro del entorno se deben usar los estandar soportados por genexus los 
+cuales son:
+
+PROTCOLO | ESTANDAR
+  SOAP ---> WSDL
+  REST ---> OpenApi
+
+PAra acceder a un web service públicado se debe conocer su localización e
+importar su definición para poder tener acceso a las funciones disponibles
+en el servicio web, genexus permite consumir web services que hallan sido
+desarrollados en otros lenguajes, con protocolo SOAP o RESST
+
+# PASOS:
+1 -> Para integrar el web service en genexus se debe:
+  1 -> Ir a la pestaña TOOLS > Aplication Integration
+    Seleccionar: 
+       > WSDL Import -> Si es Protocolo SOAP
+       > Open Api Import -> Si es Arquitectura REST
+
+  Esto desatara un wizard que variara dependiendo del servicio web elegido,
+  construira los obejtos genexus entre SDTs y Procedmientos que permitiran
+  consumir y ejecutar los servicios, estos deberan ser guardados en las carpetas
+  predestinadas por genexus.
+    SOAP: Se creara un objeto externo asociado al web service y los tipos
+    de datos estructurados para manejar sus datos
+    
+    REST: Se crearan una serie de objetos genexus, que permitiran ejecutar
+    el servicio directamente a travez de los objetos en la KB, estos
+    quedaran en una Carpeta API y en una carpeta Model los SDT para manejar
+    los Datos.
+
+2 -> Implementación SOAP:
+  1-> al seleccionar WSDL Import, se solicitara la URL del servicio, una vez
+  clickeado en Next, se debe ingresar el nombre de la carpeta donde se
+  crearan los objetos, genexus detectara los metodos dentro del web service
+  y creara automáticamente los SDT para la carga y operación con estos
+
+  2-> Counstruir un web panel: ViewCountryListFromSoapWebService
+  
+  3-> En este web panel se debera crear una variable con el nombre
+  del objeto externo que contiene los metodos operativos del web service
+    
+    > CountryInfoService
+  
+  4-> Crear una variable tipo SDT que sea una colección para alamacenar
+  los datos devueltos por el consumo SOAP
+    &CountryList -> Tipo: CountryInfoServicetCountryCodeAndName
+  
+  5-> Crear un evento click en un botón que ejecutara el metodo que traera 
+  la lista de paises y cargarlo a la variable SDT, la cual a su vez debe ser
+  puesta en el web form del panel
+
+    Event 'GetCountryList'
+      &CountryList = &CountryInfoService.ListOfCountryNamesByName()
+    Endevent
+
+3 -> Implementación REST:
+  1-> Se debe usar el estandar OpenApi, para esto una vez implementado
+  se debe cargar un archivo .yaml descargado o creado de la plataforma
+  swagger la cual implementa la espcificación Swagger.
+  
+  2-> Una vez importado el archivo .yaml, se crearan 3 carpetas:
+    Api -> Contiene los procedimientos para operar el API, Get, Post, etc
+    Client -> Contiene la url base
+    Model -> Los SDT que alamacenaran los datos ya sea request get o post
+    o tipos de datos devueltos por los metodos/procedimientos establecidos
+    en Api
+  
+-----------------------------------------------------------------------------
+CREAR WEB SERVICE QUE INSERTE UNA AEROLINEA NUEVA EN LA BD
+Este web service sera consumido por la misma aplicación desde un web
+panel el cual lo ejecutara al dar click en un botón
+-----------------------------------------------------------------------------
+
+1-> Activar el BS(Business Component) de la transacción en True
+
+2-> Crear obejto Procedimiento, el cual reciba por parametros los datos
+de una aerolinea, y una variable de tipo Ariline la cual sera Business component:
+  > CreateNewAirlineWS
+  > RULES: Parm(in: &AirlineName, in: &AirlineDiscountPercentage);
+  > Ariline -> Tipo: Business Component Airline
+
+3-> En el Source del procedimiento usamos en BS Ariline para insertar datos
+  // INSERTAR VALORES
+  &Airline.AirlineName = &AirlineName
+  &Airline.AirlineDiscountPercentage = &AirlineDiscountPercentage
+  // GUARDAR
+  &Airline.Save()
+  // SALVAR CAMBIOS
+  Commit
+
+4-> En las propiedades del Procedimiento en las opciones:
+  > Interoperability:
+    > Expose as Web Service: True
+  > Web Service Protocol
+    > SOAP Protocol: False
+    > REST Protocol: True
+    > Generate Open Api Interface: Yes -> Generara la definición de web service
+    en el estandar OpenApi
+
+5-> Realizar un build with this only sobre el Procedimiento:
+  > Esto públicara el servicio en el servidor web, en esste caso
+  en la máquina local
+  > El output generara la documentación .yaml
+    C:\KBs\WebServiceGenexus\JavaSQLServer002\Web\default.yaml
+
+6-> Generar un modulo nuevo y llamarlo:
+  WebServices
+
+7-> Realizar el Import del Yaml en Tools OpenApi, este archivo
+  > C:\KBs\NombreProyecto\JavaSQLServer002\Web\default.yaml
+  > Guardar la importación del OpenApi dentro del modulo creado
+  WebServices: Detro del el se creara
+    Api/
+      Procedimiento -> CreateNewAirlineWS
+    Cliente/
+      Procedimiento -> ApiBaseUrl
+    Model/
+      SDT-> CreateNewAirlineWSInput
+
+8-> Crear un web Panel
+  > Panel: ViewCreateNewAirlineWS
+  > Variable: CreateNewAirlineWSInput de tipo:  CreateNewAirlineWSInput
+  > Variable: IsSuccess de tipo:                Boolean
+  > Variable: HttpMessage de tipo:              Messages.Message, GeneXus.Common
+  Evento:
+    Event 'CreateNewAirline'
+      &CreateNewAirlineWSInput.AirlineName = 'Airline France'
+      &CreateNewAirlineWSInput.AirlineDiscountPercentage = 25
+      WebServices.CreateNewAirlineWS(&CreateNewAirlineWSInput, &HttpMessage, &IsSuccess)
+      if &IsSuccess
+        Msg("La Aerolinea fue creada")
+      else
+        Msg("Genexus vale kk")
+      endif
+    Endevent
+
+> 
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+-------
