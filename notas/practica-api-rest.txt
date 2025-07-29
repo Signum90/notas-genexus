@@ -29,35 +29,48 @@ HttpClient:
 -----------------------------------------------------------------------
 EN EL PROCEDIMIENTO RestService
 -----------------------------------------------------------------------
-3 - Crear una variable basada en HttpClient
-  &HttpClient
-4 - Estructurar la petición con los parametros del HttpClient
+3 - Crear un SDT con las propiedades a recibir:
+  # En Tools > Application Integration > Json Import
+  # Seleccionar el folder
+  # Agregar un Nombre: SDTNasaResponse
+  # Clickear en Text
+  # Copiar la respuesta JSON de postman
+  # Pegar en la casilla text del Json Import
+  # Se creara un SDT con las propiedades de la respuesta
+
+4 - Crear una variables :
+  
+  &httpClient - Basada en: HttpClient
+  &SDTNasaResponse - Basada en: SDTNasaResponse
+  &Response - Tipo: LongVarChar
+
+5 - Estructurar la petición con los parametros del httpClient
 
     // HOST: Url base en la que se va a realizar la consulta
-    &HttpClient.Host = "api.nasa.gov"
+    &httpClient.Host = "api.nasa.gov" // -> esto no sirve
 
     // HTTPS: Inidicar que es un metodo seguro con HTTPS en 1, si no, en 0
-    &HttpClient.Secure = 1
+    &httpClient.Secure = 1 // -> esto no sirve
 
     // BASE URL: Implementación del path url
-    &HttpClient.BaseUrl = "/planetary"
+    &httpClient.BaseUrl = "/planetary" -> esto no sirve
 
-    // HEADERS: Añadir cabeceras, en este caso de respuesta tipo json
-    &HttpClient.AddHeader('Content-type','application/json')
+    // HEADERS: Añadir cabeceras, si se va a enviar un body
+    &httpClient.AddHeader('Content-type','application/json') 
 
-    // EJECUTAR REQUEST: Se debe incluir el metodo, y la ruta final, con N parametros
-    &HttpClient.Execute("GET", "/apod?api_key=sZd1VllCASg1ZTxeRI4HzJkpbKjVoGTa5Ra9ul9U")
+    // EJECUTAR REQUEST: Se debe incluir el metodo, y la ruta completa
+    &httpClient.Execute(!"GET", !"https://api.nasa.gov/planetary/apod?api_key=sZd1VllCASg1ZTxeRI4HzJkpbKjVoGTa5Ra9ul9U")
 
     // VALIDACIÓN: calidar el código de estado
-    if &HttpClient.StatusCode = 200
+    if &httpClient.StatusCode = 200
       // Capturar el resultado, pasar a texto
-      &Response = &HttpClient.ToString()
+      &Response = &httpClient.ToString()
       // PAsar al SDT transformando a JSON	
       &SDTNasaResponse.FromJson(&Response)
     endif
 
-5 - Crear un SDT con las propiedades a recibir
 
+  
 6 - Cargar el SDT con la resuesta del request, parseando a JSON
     
     // PAsar al SDT transformando a JSON	
@@ -70,13 +83,20 @@ EN EL PROCEDIMIENTO RestService
 -----------------------------------------------------------------------
 EN EL WEB PANEL: Views
 -----------------------------------------------------------------------
-8 - En los eventos, Agregar el llamado del Procedimiento, pasando una Variable tipo SDT
+8 - Se debe crear una variable del mismo tipo del SDTNasaResponse, convertiral
+en colección
+
+9 - Cargar esta variable SDTNasaResponse al panel del web form
+
+10 - En los eventos, Agregar el llamado del Procedimiento, pasando una Variable tipo SDT
   del mismo tipo del SDT creado en el procedimiento, para recibir la respuesta
   en el web panel
   
   # EVENTO CLICK
-  Event 'GetData'
-    RestService.Call(&SDTNasaResponse)
+  Event 'GetDataNasa'
+	  GetListNasaHttpClient.Call(&SDTNasaResponse)
+	  &Imagen1.FromURL(&SDTNasaResponse.hdurl)
+	  &Imagen2.FromURL(&SDTNasaResponse.url)
   Endevent
 
 -----------------------------------------------------------------------
