@@ -91,6 +91,7 @@ de una aerolinea, y una variable de tipo Ariline la cual sera Business component
   // INSERTAR VALORES
   &Airline.AirlineName = &AirlineName
   &Airline.AirlineDiscountPercentage = &AirlineDiscountPercentage
+
   // GUARDAR
   &Airline.Save()
   // SALVAR CAMBIOS
@@ -127,21 +128,33 @@ de una aerolinea, y una variable de tipo Ariline la cual sera Business component
 
 8-> Crear un web Panel
   > Panel: ViewCreateNewAirlineWS
-  > Variable: CreateNewAirlineWSInput de tipo:  CreateNewAirlineWSInput
-  > Variable: IsSuccess de tipo:                Boolean
-  > Variable: HttpMessage de tipo:              Messages.Message, GeneXus.Common
-  Evento:
+  > Variable: CreateNewAirlineWSInput       tipo: CreateNewAirlineWSInput
+  > Variable: IsSuccess                     tipo: Boolean
+  > Variable: HttpMessage                   tipo: Messages.Message, GeneXus.Common
+  > Variable: &ServerUrlTemplatingVar       tipo: Properties
+  
+  > Evento:
+    
     Event 'CreateNewAirline'
+      // Pasar valores a insertar al SDT
       &CreateNewAirlineWSInput.AirlineName = 'Airline France'
       &CreateNewAirlineWSInput.AirlineDiscountPercentage = 25
-      WebServices.CreateNewAirlineWS(&CreateNewAirlineWSInput, &HttpMessage, &IsSuccess)
+
+      // Configurar el Server Url Template Var
+      &ServerUrlTemplatingVar.Set("scheme","http")
+	    &ServerUrlTemplatingVar.Set("host","localhost")
+      // Ejeucutar el Request
+      WebServices.CreateNewAirlineWS(&ServerUrlTemplatingVar, &CreateNewAirlineWSInput, &HttpMessage, &IsSuccess)
+      
+      // Validar Respuesta
       if &IsSuccess
         Msg("La Aerolinea fue creada")
       else
         Msg("Genexus vale kk")
       endif
-    Endevent
 
+    Endevent
+    
 > 
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
